@@ -1,4 +1,6 @@
 
+import blocks
+
 class Disk:
 
     DISK_BLOCK_SIZE = 4096    
