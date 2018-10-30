@@ -6,25 +6,25 @@ class FileSystem:
     # TODO: add fs_bitmap
 
     def fs_format():
-        pass
+        print('Formatting disk.')
 
     def fs_debug():
-        pass
+        print('Debugging...')
 
     def fs_mount():
-        pass
+        print('Mounting disk.')
 
     def fs_create():
-        pass
+        print('Creating disk.')
 
     def fs_delete( file ):
-        pass
+        print('Deleting.')
 
     def fs_getsize( file ):
-        pass
+        print('Disk size: ')
 
     def fs_read( file, length, offset ):
-        pass
+        print('Reading disk.')
 
     def fs_write( file, data, length, offset ):
-        pass
+        print('Writing to disk.')
