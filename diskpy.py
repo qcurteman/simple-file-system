@@ -19,21 +19,30 @@ class Disk:
         pass
 
     def disk_read(self, blockNumber):
-        f = open(self.diskname, "rb")
-        try:
-            byte = f.read(1)
-            while byte != "":
-                # Do stuff with byte.
-                byte = f.read(1)
-                print(byte)
-        finally:
-            f.close()
+        # f = open(self.diskname, "rb")
+        # try:
+        #     for i, line in enumerate(f):
+        #         if i == 
+        #     byte = f.read(1)
+        #     while byte != "":
+        #         # Do stuff with byte.
+        #         byte = f.read(1)
+        #         print(byte)
+        # finally:
+        #     f.close()
+
+        with open(self.diskname, 'r') as f:
+            for line in f:
+                for i in range(16):
+                    #print(line[blockNumber * 64] + i)
+                    print(line[1])
 
     def disk_write(self, blockNumber, byteArray): # why is this a bypteArray
         for i in range(len(self.disk[blockNumber])):
             self.disk[blockNumber][i] = byteArray[i]
         with open(self.diskname, 'wb') as f:
             f.write(self.disk)
+
 
     def disk_status():
         pass
