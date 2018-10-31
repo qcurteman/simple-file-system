@@ -18,8 +18,8 @@ class Disk:
     def disk_open(filename): #this filename is the filename of a file in the file system
         pass
 
-    def disk_read(blockNumber):
-        f = open("qdisk.bin", "rb")
+    def disk_read(self, blockNumber):
+        f = open(self.diskname, "rb")
         try:
             byte = f.read(1)
             while byte != "":
@@ -44,3 +44,4 @@ class Disk:
 disk1 = Disk('qdisk.bin', 5)
 barr = bytearray([7,2,3,4,5,6,7,8])
 disk1.disk_write(3, barr)
+disk1.disk_read(3)
