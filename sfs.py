@@ -1,6 +1,9 @@
 from include.fileshell import fileshell as fs
 import click
 
+# Example to start the shell:
+# python sfs.py --diskname <diskname> --blocknum <blocknum>
+
 @click.command()
 @click.option('--diskname', help='Name of disk you want to create or open.')
 @click.option('--blocknum', help='Number of blocks on the disk.')
