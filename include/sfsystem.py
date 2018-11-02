@@ -1,5 +1,5 @@
 
-import diskpy
+import include.diskpy
 
 class FileSystem:
 
