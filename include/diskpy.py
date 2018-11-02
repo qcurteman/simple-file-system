@@ -16,8 +16,8 @@ class Disk:
         with open('data/{}'.format(self.diskname), 'wb') as f:
             f.write(self.disk)
 
-    def disk_open(self, filename): # this filename is the filename of a file in the file system
-        # I think we need to make the filesystem before we can make this method
+    def disk_open(self, diskname):
+        # write what is in the disk called "diskname" to self.disk
         pass
 
     def disk_read(self, blockNumber):
@@ -50,8 +50,7 @@ class Disk:
 
 
     def disk_status(self, ):
-        # I think we need to make the filesystem before we can make this method
-        pass
+        print('The disk is doing GREAT!!')
 
     def disk_close(self, ):
         # I think we need to make the filesystem before we can make this method

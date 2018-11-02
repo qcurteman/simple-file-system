@@ -10,7 +10,7 @@ class fileshell:
     working_disk = None
 
     commands = {'format': 'Format the current disk.', 
-                'mount': 'Mount a disk to being writing and reading.',
+                'mount': '<diskname> Mount a disk to being writing and reading.',
                 'debug': 'Debug the current disk.',
                 'create': 'Create a new file.',
                 'delete': '<inode> Delete a chosen disk.',
@@ -33,7 +33,6 @@ class fileshell:
     def interpret_command(cls, command):
         command_string = command.split(' ', 1)
         command_root = command_string[0]
-        # if len(command_string) >= 2:
         try:
             arguments = command_string[1].split(' ')
         except:
@@ -47,7 +46,11 @@ class fileshell:
         if command_root == 'format':
             return_val = fileshell.shell_format()
         elif command_root == 'mount':
-            return_val = fileshell.shell_mount()
+            if len(arguments) == 1:
+                return_val = fileshell.shell_mount()
+            else:
+                print('ERROR: Received {} arguments but expected 1.'.format(len(arguments)))
+                return_val = fileshell.continue_shell
         elif command_root == 'debug':
             return_val = fileshell.shell_debug()
         elif command_root == 'create':
@@ -91,8 +94,13 @@ class fileshell:
         return fileshell.continue_shell
 
     @classmethod
-    def shell_mount(cls,):
-        print('mounting...') # Implemented with the filesystem
+    def shell_mount(cls, *args):
+        diskname = list(args)[0]
+        if diskname not in fileshell.disks:
+            print('ERROR: Disk {} does not exist'.format(diskname))
+        else:
+            diskpy.Disk.disk_open(diskname)
+            fileshell.working_disk = diskname
         return fileshell.continue_shell
 
     @classmethod
