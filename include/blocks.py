@@ -10,7 +10,7 @@ class Superblock(Block):
 
     def __init__(self, nblocks, ninodeblocks, ninodes):
         self.magic_number = '0xf0f03410'
-        self.nblocks = nblocks
+        self.nblocks = nblocks # includes the super block
         self.ninodeblocks = ninodeblocks
         self.ninodes = ninodes
 

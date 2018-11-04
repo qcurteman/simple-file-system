@@ -13,7 +13,7 @@ class Disk:
         self.NUM_BLOCKS = int(nbrOfBlocks)
         self.diskname = diskname
         self.disk = np.zeros(shape=(self.NUM_BLOCKS, Disk.DISK_BLOCK_SIZE), dtype='int8')
-        with open('data/{}'.format(self.diskname), 'wb') as f:
+        with open('data/{}'.format(self.diskname), 'wb') as f: # TODO: change the 'wb' to 'rb+'
             f.write(self.disk)
 
     def disk_open(self, diskname):
@@ -26,7 +26,7 @@ class Disk:
         start_address = Disk.DISK_BLOCK_SIZE * blockNumber
         byte_array, block_data = [], []
 
-        with open('data/{}'.format(self.diskname), 'rb') as f:
+        with open('data/{}'.format(self.diskname), 'rb') as f: # TODO: change the 'wb' to 'rb+'
             f.seek(start_address)
             for _ in range(Disk.DISK_BLOCK_SIZE):
                 byte_array.append(f.read(1))
@@ -38,14 +38,16 @@ class Disk:
 
                 
                     
-
-    def disk_write(self, blockNumber, byteArray):
+    # write the data into a buffer that is the size of a block
+    # then feed that block into this function.
+    def disk_write(self, blockNumber, byteArray): 
+        #computer offset blocknyn * blocksize
         assert(blockNumber <= self.NUM_BLOCKS), 'The block number requested is greater than the number of total blocks.'
         # Handle the cases where it is trying to write more than 1 block and the case 
         # where it is writing less than 1 block (do this in the file system)
         for i in range(len(self.disk[blockNumber])):
             self.disk[blockNumber][i] = byteArray[i]
-        with open('data/{}'.format(self.diskname), 'wb') as f:
+        with open('data/{}'.format(self.diskname), 'wb') as f: # TODO: change the 'wb' to 'rb+'
             f.write(self.disk)
 
 
@@ -56,7 +58,7 @@ class Disk:
         # I think we need to make the filesystem before we can make this method
         pass
 
-# disk1 = Disk('qdisk.bin', 6)
-# barr = bytearray([1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8])
-# disk1.disk_write(3, barr)
-# print(disk1.disk_read(3))
+disk1 = Disk('qdisk.bin', 6)
+barr = bytearray([1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8])
+disk1.disk_write(3, barr)
+print(disk1.disk_read(3))
