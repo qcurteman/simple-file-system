@@ -9,7 +9,7 @@ import click
 @click.option('--blocknum', help='Number of blocks on the disk.')
 def run_file_shell(diskname, blocknum):
     interpreted_command = True
-    fs.open_disks(diskname, blocknum)
+    fs.open_disk(diskname, blocknum)
 
     while interpreted_command != False:
         command = input('sfs>')

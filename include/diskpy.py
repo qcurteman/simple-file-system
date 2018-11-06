@@ -1,64 +1,72 @@
 
 import include.blocks
-import numpy as np
 
 class Disk:
 
-    DISK_BLOCK_SIZE = 16 # 4096
+    BLOCK_SIZE = 8 # 4096
 
 
     # a row is a block
-    def __init__(self, diskname, nbrOfBlocks):
-        self.BLOCKS = []
-        self.NUM_BLOCKS = int(nbrOfBlocks)
-        self.diskname = diskname
-        self.disk = np.zeros(shape=(self.NUM_BLOCKS, Disk.DISK_BLOCK_SIZE), dtype='int8')
-        with open('data/{}'.format(self.diskname), 'wb') as f: # TODO: change the 'wb' to 'rb+'
-            f.write(self.disk)
+    @classmethod
+    def disk_init(cls, diskname, nbrOfBlocks=32):
+        blank_block = bytearray(Disk.BLOCK_SIZE)
+        with open('data/{}'.format(diskname), 'rb+') as f:
+            [ f.write(blank_block) for _ in range(nbrOfBlocks) ]
+                
+    @classmethod
+    def disk_open(cls, diskname):
+        fl = open('data/{}'.format(diskname), 'rb+')
+        return fl
 
-    def disk_open(self, diskname):
-        # write what is in the disk called "diskname" to self.disk
-        pass
-
-    def disk_read(self, blockNumber):
-        assert(blockNumber <= self.NUM_BLOCKS), 'The block number requested is greater than the number of total blocks.'
-
-        start_address = Disk.DISK_BLOCK_SIZE * blockNumber
+    @classmethod
+    def disk_read(cls, open_file, blockNumber):
+        start_address = Disk.BLOCK_SIZE * blockNumber
         byte_array, block_data = [], []
 
-        with open('data/{}'.format(self.diskname), 'rb') as f: # TODO: change the 'wb' to 'rb+'
-            f.seek(start_address)
-            for _ in range(Disk.DISK_BLOCK_SIZE):
-                byte_array.append(f.read(1))
+        open_file.seek(start_address)
+        for _ in range(Disk.BLOCK_SIZE):
+            byte_array.append(open_file.read(1))
 
         for item in byte_array:
             block_data.append(int.from_bytes(item, 'little'))
 
         return block_data
 
-                
-                    
-    # write the data into a buffer that is the size of a block
-    # then feed that block into this function.
-    def disk_write(self, blockNumber, byteArray): 
-        #computer offset blocknyn * blocksize
-        assert(blockNumber <= self.NUM_BLOCKS), 'The block number requested is greater than the number of total blocks.'
-        # Handle the cases where it is trying to write more than 1 block and the case 
-        # where it is writing less than 1 block (do this in the file system)
-        for i in range(len(self.disk[blockNumber])):
-            self.disk[blockNumber][i] = byteArray[i]
-        with open('data/{}'.format(self.diskname), 'wb') as f: # TODO: change the 'wb' to 'rb+'
-            f.write(self.disk)
+    @classmethod
+    def disk_write(cls, open_file, blockNumber, data): 
+        start_address = Disk.BLOCK_SIZE * blockNumber
+        open_file.seek(start_address)
 
+        byte_data = bytearray(data)
+        num_blocks = int(len(byte_data) / Disk.BLOCK_SIZE)
 
-    def disk_status(self, ):
+        open_file.write(byte_data[:])
+
+    @classmethod
+    def disk_status(cls, ):
         print('The disk is doing GREAT!!')
 
-    def disk_close(self, ):
-        # I think we need to make the filesystem before we can make this method
-        pass
+    @classmethod
+    def disk_close(cls, open_file):
+        open_file.close()
 
-disk1 = Disk('qdisk.bin', 6)
-barr = bytearray([1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8])
-disk1.disk_write(3, barr)
-print(disk1.disk_read(3))
+# disk1 = Disk('qdisk.bin', 6)
+barr = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28]
+barr1 = [9,8,7,6,5,4,3,2,1]
+# disk1.disk_write(3, barr)
+# print(disk1.disk_read(3))
+
+
+# Disk.disk_init('qdisk2.bin', 50)
+open_file = Disk.disk_open('qdisk2.bin')
+
+Disk.disk_write(open_file, 0, barr1)
+
+print(Disk.disk_read(open_file, 0))
+
+print(Disk.disk_read(open_file, 5))
+print(Disk.disk_read(open_file, 6))
+print(Disk.disk_read(open_file, 7))
+print(Disk.disk_read(open_file, 8))
+
+Disk.disk_close(open_file)
