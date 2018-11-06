@@ -22,7 +22,7 @@ class fileshell:
                 'exit': 'Exit the shell.'}
 
     @classmethod
-    def open_disks(cls, diskname, blocknum):
+    def open_disk(cls, diskname, blocknum):
         fileshell.disks = listdir('{}/data'.format(getcwd()))
         if diskname not in fileshell.disks:
             diskpy.Disk(diskname, blocknum)
