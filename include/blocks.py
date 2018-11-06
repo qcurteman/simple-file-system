@@ -1,4 +1,5 @@
 from include.diskpy import Disk
+import numpy as np
 class Block:
 
     size = Disk.BLOCK_SIZE
@@ -16,6 +17,15 @@ class Superblock(Block):
         self.ninodeblocks = ninodeblocks # number of blocks set aside for storing inodes
         self.ninodes = ninodes # number of inodes that is in each inodeblock
 
+    @classmethod
+    def make_block(cls, nblocks=5, ninodeblocks=4, ninodes=3):
+        arr = np.zeros(shape=(Disk.BLOCK_SIZE), dtype='int8')
+        arr[0] = 111
+        arr[1] = nblocks
+        arr[2] = ninodeblocks
+        arr[3] = ninodes
+        return bytearray(arr)
+
 
 class Inode:
 
@@ -27,6 +37,19 @@ class Inode:
         self.direct = [] * 5 # points to data blocks
         self.indirect = 0 # points to an indirect block
 
+    # returns a bytearray
+    @classmethod
+    def make_inode(cls, is_valid=False, direct_blocks=[0]*5, indirect_loc=0):
+        arr = np.zeros(shape=(Inode.size), dtype='int8')
+        arr[0] = is_valid
+        arr[1] = Inode.size
+        index = 0
+        for i in range(2, len(direct_blocks)):
+            arr[i] = direct_blocks[index]
+            index += 1
+        arr[2 + len(direct_blocks)] = indirect_loc
+        return arr
+
 
 class InodeBlock(Block):
     
@@ -37,6 +60,18 @@ class InodeBlock(Block):
         self.inodes = []
         for _ in range(num_inodes):
             self.inodes.append(Inode())
+
+    @classmethod
+    def init_block(cls):
+        num_inodes = int( Block.size / Inode.size)
+        merged_inodes = np.zeros(shape=(Disk.BLOCK_SIZE), dtype='int8')
+        inode = Inode.make_inode()
+        index = 0
+        for _ in range(num_inodes):
+            for item in inode:
+                merged_inodes[index] = item
+                index += 1
+        return bytearray(merged_inodes)
 
 
 class IndirectBlock(Block):
@@ -51,12 +86,6 @@ class DataBlock(Block):
         pass
 
 
-
-
-testblock = Superblock(1, 2, 5)
-print(testblock.size)
-print(testblock.start_address)
-
-b2 = InodeBlock(16)
-
-print(b2.inodes)
+print('Superblock: ', Superblock.make_block())
+print('Inode: ', Inode.make_inode())
+print('Inode Block: ', InodeBlock.init_block())

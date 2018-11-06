@@ -2,7 +2,7 @@
 
 class Disk:
 
-    BLOCK_SIZE = 8 # 4096
+    BLOCK_SIZE = 16 # 4096
 
     # a row is a block
     @classmethod
