@@ -62,7 +62,7 @@ class InodeBlock(Block):
             self.inodes.append(Inode())
 
     @classmethod
-    def init_block(cls):
+    def make_block(cls):
         num_inodes = int( Block.size / Inode.size)
         merged_inodes = np.zeros(shape=(Disk.BLOCK_SIZE), dtype='int8')
         inode = Inode.make_inode()
@@ -86,6 +86,6 @@ class DataBlock(Block):
         pass
 
 
-print('Superblock: ', Superblock.make_block())
-print('Inode: ', Inode.make_inode())
-print('Inode Block: ', InodeBlock.init_block())
+# print('Superblock: ', Superblock.make_block())
+# print('Inode: ', Inode.make_inode())
+# print('Inode Block: ', InodeBlock.make_block())
