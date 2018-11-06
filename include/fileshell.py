@@ -7,27 +7,28 @@ class fileshell:
     continue_shell = True
     exit_shell = False
     disks = []
-    working_disk = None
+    mounted_disk = None
 
-    commands = {'format': 'Format the current disk.', 
-                'mount': '<diskname> Mount a disk to being writing and reading.',
-                'debug': 'Debug the current disk.',
-                'create': 'Create a new file.',
-                'delete': '<inode> Delete a chosen disk.',
-                'cat': '<inode> Cat command.', 
+    commands = {'cat': '<inode> Cat command.',
                 'copyin': '<file> <inode> Copy an entire file in.',
                 'copyout': '<inode> <file> Copy an entire file out.',
-                'help': 'List all available commands.', 
-                'quit': 'Quit running any current command.',
-                'exit': 'Exit the shell.'}
+                'create': 'Create a new file.',
+                'debug': 'Debug the current disk.',
+                'delete': '<inode> Delete a chosen disk.',
+                'disks': 'List the disks available and the mounted one.',
+                'exit': 'Exit the shell.',
+                'format': 'Format the current disk.', 
+                'help': 'List all available commands.',
+                'mount': '<diskname> Mount a disk to being writing and reading.',
+                'quit': 'Quit running any current command.',}
 
     @classmethod
     def open_disk(cls, diskname, blocknum):
         fileshell.disks = listdir('{}/data'.format(getcwd()))
         if diskname not in fileshell.disks:
-            diskpy.Disk(diskname, blocknum)
+            diskpy.Disk.disk_init(diskname, blocknum)
             fileshell.disks.append(diskname)
-        fileshell.working_disk = diskname
+        fileshell.mounted_disk = diskname
 
     @classmethod
     def interpret_command(cls, command):
@@ -47,7 +48,7 @@ class fileshell:
             return_val = fileshell.shell_format()
         elif command_root == 'mount':
             if len(arguments) == 1:
-                return_val = fileshell.shell_mount()
+                return_val = fileshell.shell_mount(arguments)
             else:
                 print('ERROR: Received {} arguments but expected 1.'.format(len(arguments)))
                 return_val = fileshell.continue_shell
@@ -85,6 +86,8 @@ class fileshell:
             return_val = fileshell.shell_quit()
         elif command_root == 'exit':
             return_val = fileshell.shell_exit()
+        elif command_root == 'disks':
+            return_val = fileshell.shell_disks()
         
         return return_val
 
@@ -95,12 +98,12 @@ class fileshell:
 
     @classmethod
     def shell_mount(cls, *args):
-        diskname = list(args)[0]
+        diskname = list(args)[0][0]
         if diskname not in fileshell.disks:
             print('ERROR: Disk {} does not exist'.format(diskname))
         else:
             diskpy.Disk.disk_open(diskname)
-            fileshell.working_disk = diskname
+            fileshell.mounted_disk = diskname
         return fileshell.continue_shell
 
     @classmethod
@@ -157,5 +160,12 @@ class fileshell:
         print('exiting shell...')
         return fileshell.exit_shell
 
+    @classmethod
+    def shell_disks(cls,):
+        for disk in fileshell.disks:
+            if disk == fileshell.mounted_disk:
+                print('  * {}'.format(disk))
+            else:
+                print('    {}'.format(disk))
         
     
