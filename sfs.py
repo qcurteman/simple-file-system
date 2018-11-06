@@ -9,8 +9,8 @@ import click
 @click.option('--blocknum', help='Number of blocks on the disk.')
 def run_file_shell(diskname, blocknum):
     interpreted_command = True
-    # fs.open_disk(diskname, blocknum)
-    fs.open_disk('qdisk3.bin', 100) # for debugging
+    fs.open_disk(diskname, blocknum)
+    # fs.open_disk('qdisk3.bin', 100) # for debugging
 
     while interpreted_command != False:
         command = input('sfs>')

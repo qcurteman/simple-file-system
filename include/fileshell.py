@@ -19,7 +19,7 @@ class fileshell:
                 'exit': 'Exit the shell.',
                 'format': 'Format the current disk.', 
                 'help': 'List all available commands.',
-                'mount': '<diskname> Mount a disk to being writing and reading.',
+                'mount': '<diskname> Mount a disk for writing and reading.',
                 'quit': 'Quit running any current command.',}
 
     @classmethod
@@ -93,7 +93,14 @@ class fileshell:
 
     @classmethod
     def shell_format(cls,):
-        print('formatting...') # Implemented with the filesystem
+        ans = input('Are you sure you want to format {}? (y/n) '.format(fileshell.mounted_disk))
+        if ans == 'Y' or ans == 'y':
+            print('formatting...')
+            
+        elif ans == 'N' or ans == 'n':
+            print('canceling format.')
+        else:
+            print('canceling format, unrecognized response.')
         return fileshell.continue_shell
 
     @classmethod

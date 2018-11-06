@@ -1,35 +1,42 @@
-
+from include.diskpy import Disk
 class Block:
 
-    def __init__(self, ):
-        self.size = '4KB' # TODO: fill this in correclty
-        self.address # ??? maybe have a start address and end address ??
+    size = Disk.BLOCK_SIZE
+
+    def __init__(self, start_address):
+        self.start_address = start_address
         
 
 class Superblock(Block):
 
     def __init__(self, nblocks, ninodeblocks, ninodes):
+        super().__init__(0)
         self.magic_number = '0xf0f03410'
         self.nblocks = nblocks # includes the super block
-        self.ninodeblocks = ninodeblocks
-        self.ninodes = ninodes
+        self.ninodeblocks = ninodeblocks # number of blocks set aside for storing inodes
+        self.ninodes = ninodes # number of inodes that is in each inodeblock
 
 
-class Inode():
+class Inode:
 
-    # each field is 32-bits
-    def __init__(self, size):
-        self.is_valid = False
-        self.size = size
-        self.direct = [] # points to data blocks
+    size = 8 # logical size of inode data in bytes
+
+    # TODO: Figure out the size of an inode so that I can figure out how many I can fit in an inodeblock
+    def __init__(self,):
+        self.is_valid = False # 1 if the inode is valid (has been created) and is 0 otherwise.
+        self.direct = [] * 5 # points to data blocks
         self.indirect = 0 # points to an indirect block
 
 
 class InodeBlock(Block):
     
     # consists of 128 Inodes
-    def __init__(self, ):
-        pass
+    def __init__(self, start_address):
+        super().__init__(start_address)
+        num_inodes = int( Block.size / Inode.size)
+        self.inodes = []
+        for _ in range(num_inodes):
+            self.inodes.append(Inode())
 
 
 class IndirectBlock(Block):
@@ -42,3 +49,14 @@ class IndirectBlock(Block):
 class DataBlock(Block):
     def __init__(self, ):
         pass
+
+
+
+
+testblock = Superblock(1, 2, 5)
+print(testblock.size)
+print(testblock.start_address)
+
+b2 = InodeBlock(16)
+
+print(b2.inodes)
