@@ -18,7 +18,7 @@ class Superblock(Block):
     #     self.ninodes = ninodes # number of inodes that is in each inodeblock
 
     @classmethod
-    def make_block(cls, nblocks=50, ninodeblocks=4, ninodes=3):
+    def make_block(cls, nblocks=50, ninodeblocks=4, ninodes=2):
         arr = np.zeros(shape=(Disk.BLOCK_SIZE), dtype='int8')
         arr[0] = 111
         arr[1] = nblocks
