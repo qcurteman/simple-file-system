@@ -24,10 +24,13 @@ class fileshell:
                 'quit': 'Quit running any current command.',}
 
     @classmethod
-    def open_disk(cls, diskname, blocknum):
+    def open_disk(cls, diskname, numblocks):
         fileshell.disks = listdir('{}/data'.format(getcwd()))
         if diskname not in fileshell.disks:
-            diskpy.Disk.disk_init(diskname, blocknum)
+            diskpy.Disk.disk_init(diskname, numblocks)
+            open_disk = diskpy.Disk.disk_open(diskname)
+            fileshell.initialize_blocks(open_disk, numblocks)
+            diskpy.Disk.disk_close(open_disk)
             fileshell.disks.append(diskname)
         fileshell.mounted_disk = diskname
 
@@ -97,13 +100,13 @@ class fileshell:
         ans = input('Are you sure you want to format {}? (y/n) '.format(fileshell.mounted_disk))
         if ans == 'Y' or ans == 'y':
             print('formatting...')
-            diskpy.Disk.disk_init(fileshell.mounted_disk, 50)
             open_disk = diskpy.Disk.disk_open(fileshell.mounted_disk)
-            superblock = blocks.Superblock.make_block()
-            inodeblock = blocks.InodeBlock.make_block()
-            diskpy.Disk.disk_write(open_disk, 0, superblock)
-            for i in range(1, 4):
-                diskpy.Disk.disk_write(open_disk, i, inodeblock)
+            disk_size = diskpy.Disk.disk_size(open_disk)
+
+            diskpy.Disk.disk_init(fileshell.mounted_disk, disk_size)
+            fileshell.initialize_blocks(open_disk, disk_size)
+
+            diskpy.Disk.disk_close(open_disk)
 
         elif ans == 'N' or ans == 'n':
             print('canceling format.')
@@ -183,4 +186,11 @@ class fileshell:
             else:
                 print('    {}'.format(disk))
         
-    
+    @classmethod
+    def initialize_blocks(cls, open_disk, disk_size):
+        superblock = blocks.Superblock.make_block(nblocks=disk_size)
+        inodeblock = blocks.InodeBlock.make_block()
+
+        diskpy.Disk.disk_write(open_disk, 0, superblock)
+        for i in range(1, 4):
+            diskpy.Disk.disk_write(open_disk, i, inodeblock)

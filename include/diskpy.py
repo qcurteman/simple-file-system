@@ -40,6 +40,11 @@ class Disk:
         open_file.write(byte_data[:])
 
     @classmethod
+    def disk_size(cls, open_file):
+        superblock = Disk.disk_read(open_file, 0)
+        return superblock[1]
+
+    @classmethod
     def disk_status(cls, ):
         print('The disk is doing GREAT!!')
 
