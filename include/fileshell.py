@@ -26,11 +26,6 @@ class fileshell:
         filesystem.disks = listdir('{}/data'.format(getcwd()))
         if diskname not in filesystem.disks:
             filesystem.new_disk(diskname, numblocks)
-            # diskpy.Disk.disk_init(diskname, numblocks)
-            # open_disk = diskpy.Disk.disk_open(diskname)
-            # fileshell.initialize_blocks(open_disk, numblocks)
-            # diskpy.Disk.disk_close(open_disk)
-            # filesystem.disks.append(diskname)
         filesystem.mounted_disk = diskname
 
     @classmethod
