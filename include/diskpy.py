@@ -3,6 +3,7 @@
 class Disk:
 
     BLOCK_SIZE = 16 # 4096
+    ENCODING = 'utf8'
 
     # a row is a block
     @classmethod
