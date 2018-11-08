@@ -35,7 +35,11 @@ class Disk:
         start_address = Disk.BLOCK_SIZE * blockNumber
         open_file.seek(start_address)
 
-        byte_data = bytearray(data)
+        # Check the data type to determine how to convert to binary
+        if type(data) == str:
+            byte_data = bytearray(data, Disk.ENCODING)
+        else:
+            byte_data = bytearray(data)
 
         open_file.write(byte_data[:])
 
