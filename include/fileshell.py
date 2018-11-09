@@ -1,6 +1,5 @@
 from include.sfsystem import filesystem
 import include.diskpy as diskpy
-import include.blocks as blocks
 from os import listdir, getcwd
 
 class fileshell:
