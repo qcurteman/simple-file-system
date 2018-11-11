@@ -15,7 +15,7 @@ class filesystem:
         open_disk = diskpy.Disk.disk_open(filesystem.mounted_disk)
         disk_size = diskpy.Disk.disk_size(open_disk)
         diskpy.Disk.disk_init(filesystem.mounted_disk, disk_size)
-        diskpy.Disk.initialize_blocks(open_disk, disk_size) # TODO: Eventually make the initializing of the blocks happen in the disk
+        diskpy.Disk.initialize_blocks(open_disk, disk_size)
         diskpy.Disk.disk_close(open_disk)
 
     @classmethod

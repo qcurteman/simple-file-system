@@ -66,7 +66,7 @@ class Disk:
         return diskname
 
     @classmethod
-    def initialize_blocks(cls, open_disk, disk_size): # TODO: Move this functionality to happen in the diskpy.py
+    def initialize_blocks(cls, open_disk, disk_size):
         superblock = blocks.Superblock.make_block(block_size=Disk.BLOCK_SIZE, nblocks=disk_size)
         inodeblock = blocks.InodeBlock.make_block(block_size=Disk.BLOCK_SIZE)
 
