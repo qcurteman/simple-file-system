@@ -22,7 +22,9 @@ class filesystem:
 
     @classmethod
     def fs_mount(cls, diskname):
-        diskpy.Disk.disk_open(diskname)
+        open_file = diskpy.Disk.disk_open(diskname)
+        diskpy.Disk.load_bitmaps(open_file)
+        diskpy.Disk.disk_close(open_file)
         filesystem.mounted_disk = diskname
 
     @classmethod

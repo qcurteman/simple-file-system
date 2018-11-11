@@ -4,7 +4,7 @@ class Block:
     data_type = 'int8'
         
 
-class Superblock(Block):
+class Superblock:
 
     '''
         Superblock structure
@@ -30,12 +30,19 @@ class Superblock(Block):
             first_inodeblock (arr[8]):
                 - Blocknumber where the first inodeblock is stored
     '''
-    # def __init__(self, nblocks, ninodeblocks, ninodes):
-    #     super().__init__(0)
-    #     self.magic_number = '0xf0f03410'
-    #     self.nblocks = nblocks # includes the super block
-    #     self.ninodeblocks = ninodeblocks # number of blocks set aside for storing inodes
-    #     self.ninodes = ninodes # number of inodes that is in each inodeblock
+    def __init__(self, superblock=None):
+        if superblock != None:
+            self.magic_number = superblock[0]
+            self.nblocks = superblock[1] # includes the super block
+            self.ninodeblocks = superblock[2] # number of blocks set aside for storing inodes
+            self.ninodes = superblock[3] # number of inodes that is in each inodeblock
+            self.directory_inode = superblock[4]
+            self.datablock_bitmap_loc = superblock[5]
+            self.inode_bitmap_loc = superblock[6]
+            self.first_datablock = superblock[7]
+            self.first_inodeblock = superblock[8]
+
+
     @classmethod
     def make_block(cls, block_size, nblocks=50, ninodeblocks=4,):
         arr = np.zeros(shape=(block_size), dtype=Block.data_type)
@@ -71,7 +78,10 @@ class BlockBitmap(Block):
     def __init__(self, block_size, arraysize, blockNbr):
         self.blockNbr = blockNbr
         self.arraysize = arraysize
+        print(self.arraysize)
         self.blockbitmap = np.zeros(shape=(block_size, 1), dtype='int8')
+        for i in range(self.arraysize):
+            self.blockbitmap[i] = 1
 
     def init(self):
         # initialize the array with FREE, USED, and BAD
