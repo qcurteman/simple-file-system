@@ -5,8 +5,6 @@ from os import listdir, getcwd
 
 class filesystem:
 
-    # TODO: add fs_bitmap
-
     disks = []
     mounted_disk = None
 
@@ -23,8 +21,9 @@ class filesystem:
         print('Debugging...')
 
     @classmethod
-    def fs_mount(cls, ):
-        print('Mounting disk.')
+    def fs_mount(cls, diskname):
+        diskpy.Disk.disk_open(diskname)
+        filesystem.mounted_disk = diskname
 
     @classmethod
     def fs_create(cls, ):

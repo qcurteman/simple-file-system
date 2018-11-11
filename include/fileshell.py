@@ -1,5 +1,4 @@
 from include.sfsystem import filesystem
-import include.diskpy as diskpy
 
 class fileshell:
 
@@ -107,8 +106,7 @@ class fileshell:
         if diskname not in filesystem.disks:
             print('ERROR: Disk {} does not exist'.format(diskname))
         else:
-            diskpy.Disk.disk_open(diskname) # TODO: Move this to sfsystem.py
-            filesystem.mounted_disk = diskname # and this
+            filesystem.fs_mount(diskname)
         return fileshell.continue_shell
 
     @classmethod
