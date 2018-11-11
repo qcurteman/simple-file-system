@@ -1,11 +1,7 @@
 
 import numpy as np
 class Block:
-    pass
-    # size = Disk.BLOCK_SIZE
-
-    # def __init__(self, start_address):
-    #     self.start_address = start_address
+    data_type = 'int8'
         
 
 class Superblock(Block):
@@ -13,34 +9,85 @@ class Superblock(Block):
     '''
         Superblock structure
 
-            magic_number:
-                - Number the verifies that the disk is good to read
-            nblocks:
-                - Number of blocks, including the superblock, that are on the disk
-            ninodeblocks:
-                - Number of blocks set aside for storing Inodes
-            ninodes:
-                - Number of I nodes that is in each InodeBlock
-            bitmap_location:
-                - Address where the bitmap block is stored
-    
-    '''
+        Attributes:
 
+            magic_number (arr[0]):
+                - Number the verifies that the disk is good to read
+            nblocks (arr[1]):
+                - Number of blocks, including the superblock, that are on the disk
+            ninodeblocks (arr[2]):
+                - Number of blocks set aside for storing Inodes
+            ninodes (arr[3]):
+                - Number of Inodes that is in each InodeBlock
+            directory_inode (arr[4]):
+                - ????
+            datablock_bitmap_loc (arr[5]):
+                - Blocknumber where the databitmap is stored
+            inode_bitmap_loc (arr[6]):
+                - Blocknumber where the inodebitmap is stored
+            first_datablock (arr[7]):
+                - Blocknumber where the first datablock is stored
+            first_inodeblock (arr[8]):
+                - Blocknumber where the first inodeblock is stored
+    '''
     # def __init__(self, nblocks, ninodeblocks, ninodes):
     #     super().__init__(0)
     #     self.magic_number = '0xf0f03410'
     #     self.nblocks = nblocks # includes the super block
     #     self.ninodeblocks = ninodeblocks # number of blocks set aside for storing inodes
     #     self.ninodes = ninodes # number of inodes that is in each inodeblock
-
     @classmethod
-    def make_block(cls, block_size, nblocks=50, ninodeblocks=4, ninodes=2):
-        arr = np.zeros(shape=(block_size), dtype='int8')
+    def make_block(cls, block_size, nblocks=50, ninodeblocks=4,):
+        arr = np.zeros(shape=(block_size), dtype=Block.data_type)
         arr[0] = 111
-        arr[1] = nblocks # includes the super block
-        arr[2] = ninodeblocks # number of blocks set aside for storing inodes
-        arr[3] = ninodes # number of inodes that is in each inodeblock
+        arr[1] = nblocks
+        arr[2] = ninodeblocks 
+        arr[3] = int(block_size / Inode.size)
+        arr[4] = 0
+        arr[5] = 1
+        arr[6] = 2
+        arr[7] = arr[2] + arr[6] + 1 # put it right after the last inodeblock 
+        arr[8] = arr[6] + 1 # put it right after the inodebitmap block
         return bytearray(arr)
+
+class BlockBitmap(Block):
+
+    '''
+    BlockBitmap structure
+
+    Attributes:
+
+        block_size:
+            - Size of a single block.
+        arraysize:
+            - Equal to the total number of certain block types (inode or data blocks) on the disk 
+        blockbitmap:
+            - Actual bitmap
+
+    Methods:
+
+    '''
+
+    def __init__(self, block_size, arraysize, blockNbr):
+        self.blockNbr = blockNbr
+        self.arraysize = arraysize
+        self.blockbitmap = np.zeros(shape=(block_size, 1), dtype='int8')
+
+    def init(self):
+        # initialize the array with FREE, USED, and BAD
+        pass
+
+    def setFree(self, atOffset):
+        pass
+
+    def setUsed(self, atOffset):
+        pass
+
+    def findFree(self):
+        pass
+
+    def saveToDisk(self): # save the contents of "self.blockbitmap" to the disk
+        pass
 
 
 class Inode:
@@ -48,29 +95,29 @@ class Inode:
     '''
         Inode Structure:
 
-        is_valid:
-            - 0 (False) if the inode has not been used yet
-            - 1 (True) if the inode has been used
-        size: 
-            - Size of a single Inode
-        direct:
-            - list of addresses that point to data blocks
-        indirect: 
-            - holds an address that points to an indirect block
+        Attributes:
+
+            is_valid:
+                - 0 (False) if the inode has not been used yet
+                - 1 (True) if the inode has been used
+            size: 
+                - Size of a single Inode
+            direct:
+                - list of addresses that point to data blocks
+            indirect: 
+                - holds an address that points to an indirect block
     '''
 
 
     size = 8 # logical size of inode data in bytes
 
-    # def __init__(self,):
+# def __init__(self,):
     #     self.is_valid = False # 1 if the inode is valid (has been created) and is 0 otherwise.
     #     self.direct = [] * 5 # points to data blocks
     #     self.indirect = 0 # points to an indirect block
-
-    # returns a bytearray
     @classmethod
     def make_inode(cls, is_valid=False, direct_blocks=[0]*5, indirect_loc=0):
-        arr = np.zeros(shape=(Inode.size), dtype='int8')
+        arr = np.zeros(shape=(Inode.size), dtype=Block.data_type)
         arr[0] = is_valid
         arr[1] = Inode.size
         index = 0
@@ -102,7 +149,7 @@ class InodeBlock(Block):
     @classmethod
     def make_block(cls, block_size):
         num_inodes = int( block_size / Inode.size)
-        merged_inodes = np.zeros(shape=(block_size), dtype='int8')
+        merged_inodes = np.zeros(shape=(block_size), dtype=Block.data_type)
         inode = Inode.make_inode()
         index = 0
         for _ in range(num_inodes):
@@ -120,10 +167,5 @@ class IndirectBlock(Block):
 
 
 class DataBlock(Block):
-    def __init__(self, ):
-        pass
-
-
-# print('Superblock: ', Superblock.make_block())
-# print('Inode: ', Inode.make_inode())
-# print('Inode Block: ', InodeBlock.make_block())
+    def __init__(self, block_size):
+        self.data = np.zeros(shape=(block_size, 1), dtype=Block.data_type)

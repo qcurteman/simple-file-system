@@ -71,5 +71,5 @@ class Disk:
         inodeblock = blocks.InodeBlock.make_block(block_size=Disk.BLOCK_SIZE)
 
         Disk.disk_write(open_disk, 0, superblock)
-        for i in range(1, 4):
-            Disk.disk_write(open_disk, i, inodeblock)
+        for i in range(superblock[2]): # superblock[2] is number of inodeblocks
+            Disk.disk_write(open_disk, superblock[8] + i, inodeblock) # superblock[8] is the location of the first inodeblock
