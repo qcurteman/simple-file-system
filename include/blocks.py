@@ -1,8 +1,8 @@
-from include.diskpy import Disk
+
 import numpy as np
 class Block:
-
-    size = Disk.BLOCK_SIZE
+    pass
+    # size = Disk.BLOCK_SIZE
 
     # def __init__(self, start_address):
     #     self.start_address = start_address
@@ -34,8 +34,8 @@ class Superblock(Block):
     #     self.ninodes = ninodes # number of inodes that is in each inodeblock
 
     @classmethod
-    def make_block(cls, nblocks=50, ninodeblocks=4, ninodes=2):
-        arr = np.zeros(shape=(Disk.BLOCK_SIZE), dtype='int8')
+    def make_block(cls, block_size, nblocks=50, ninodeblocks=4, ninodes=2):
+        arr = np.zeros(shape=(block_size), dtype='int8')
         arr[0] = 111
         arr[1] = nblocks # includes the super block
         arr[2] = ninodeblocks # number of blocks set aside for storing inodes
@@ -100,9 +100,9 @@ class InodeBlock(Block):
     #         self.inodes.append(Inode())
 
     @classmethod
-    def make_block(cls):
-        num_inodes = int( Block.size / Inode.size)
-        merged_inodes = np.zeros(shape=(Disk.BLOCK_SIZE), dtype='int8')
+    def make_block(cls, block_size):
+        num_inodes = int( block_size / Inode.size)
+        merged_inodes = np.zeros(shape=(block_size), dtype='int8')
         inode = Inode.make_inode()
         index = 0
         for _ in range(num_inodes):

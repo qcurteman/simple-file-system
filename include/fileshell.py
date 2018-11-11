@@ -1,6 +1,5 @@
 from include.sfsystem import filesystem
 import include.diskpy as diskpy
-from os import listdir, getcwd
 
 class fileshell:
 
@@ -18,14 +17,13 @@ class fileshell:
                 'format': 'Format the current disk.', 
                 'help': 'List all available commands.',
                 'mount': '<diskname> Mount a disk for writing and reading.',
-                'quit': 'Quit running any current command.',}
+                'quit': 'Quit running any current command.',
+                'scan': 'Create bitmap based on currently mounted disk.'}
 
     @classmethod
     def open_disk(cls, diskname, numblocks):
-        filesystem.disks = listdir('{}/data'.format(getcwd()))
-        if diskname not in filesystem.disks:
-            filesystem.new_disk(diskname, numblocks)
-        filesystem.mounted_disk = diskname
+        filesystem.fs_open_disk(diskname, numblocks)
+        
 
     @classmethod
     def interpret_command(cls, command):
@@ -85,6 +83,8 @@ class fileshell:
             return_val = fileshell.shell_exit()
         elif command_root == 'disks':
             return_val = fileshell.shell_disks()
+        elif command_root == 'scan':
+            return_val = fileshell.scan_disk()
         
         return return_val
 
@@ -107,8 +107,8 @@ class fileshell:
         if diskname not in filesystem.disks:
             print('ERROR: Disk {} does not exist'.format(diskname))
         else:
-            diskpy.Disk.disk_open(diskname)
-            filesystem.mounted_disk = diskname
+            diskpy.Disk.disk_open(diskname) # TODO: Move this to sfsystem.py
+            filesystem.mounted_disk = diskname # and this
         return fileshell.continue_shell
 
     @classmethod
