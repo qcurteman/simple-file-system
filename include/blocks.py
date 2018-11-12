@@ -78,10 +78,7 @@ class BlockBitmap(Block):
     def __init__(self, block_size, arraysize, blockNbr):
         self.blockNbr = blockNbr
         self.arraysize = arraysize
-        print(self.arraysize)
         self.blockbitmap = np.zeros(shape=(block_size, 1), dtype='int8')
-        for i in range(self.arraysize):
-            self.blockbitmap[i] = 1
 
     def init(self):
         # initialize the array with FREE, USED, and BAD

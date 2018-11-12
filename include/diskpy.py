@@ -85,7 +85,5 @@ class Disk:
         Disk.inodebitmap = blocks.BlockBitmap(Disk.BLOCK_SIZE, superblock.ninodeblocks, superblock.inode_bitmap_loc)
         
         Disk.databitmap = blocks.BlockBitmap(Disk.BLOCK_SIZE, 4, superblock.datablock_bitmap_loc) # TODO: Change the 4 to be the num of data blocks on the disk. Maybe this: (superblock.nblocks - superblock.first_datablock)
-
-        print(Disk.inodebitmap.blockbitmap)
-        print(Disk.databitmap.blockbitmap)
+        
         
