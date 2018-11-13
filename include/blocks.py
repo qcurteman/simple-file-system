@@ -1,7 +1,7 @@
 
 import numpy as np
 class Block:
-    data_type = 'int8'
+    data_type = 'int32'
         
 
 class Superblock:
@@ -33,7 +33,7 @@ class Superblock:
     def __init__(self, superblock=None):
         if superblock != None:
             self.magic_number = superblock[0]
-            self.nblocks = superblock[1] # includes the super block
+            self.nblocks = superblock[1] # number of blocks on disk. Includes the super block
             self.ninodeblocks = superblock[2] # number of blocks set aside for storing inodes
             self.ninodes = superblock[3] # number of inodes that is in each inodeblock
             self.directory_inode = superblock[4]
@@ -46,16 +46,16 @@ class Superblock:
     @classmethod
     def make_block(cls, block_size, nblocks=50, ninodeblocks=4,):
         arr = np.zeros(shape=(block_size), dtype=Block.data_type)
-        arr[0] = 111
+        arr[0] = 11111
         arr[1] = nblocks
         arr[2] = ninodeblocks 
-        arr[3] = int(block_size / Inode.size)
+        arr[3] = block_size // Inode.size
         arr[4] = 0
         arr[5] = 1
         arr[6] = 2
         arr[7] = arr[2] + arr[6] + 1 # put it right after the last inodeblock 
         arr[8] = arr[6] + 1 # put it right after the inodebitmap block
-        return bytearray(arr)
+        return arr
 
 class BlockBitmap(Block):
 
@@ -78,7 +78,7 @@ class BlockBitmap(Block):
     def __init__(self, block_size, arraysize, blockNbr):
         self.blockNbr = blockNbr
         self.arraysize = arraysize
-        self.blockbitmap = np.zeros(shape=(block_size, 1), dtype='int8')
+        self.blockbitmap = np.zeros(shape=(block_size, 1), dtype=data_type)
 
     def init(self):
         # initialize the array with FREE, USED, and BAD
@@ -116,7 +116,8 @@ class Inode:
     '''
 
 
-    size = 8 # logical size of inode data in bytes
+    size = 32 # logical size of inode data in bytes
+    num_indexes = 8 # This is the number of indexes 
 
 # def __init__(self,):
     #     self.is_valid = False # 1 if the inode is valid (has been created) and is 0 otherwise.
@@ -124,15 +125,15 @@ class Inode:
     #     self.indirect = 0 # points to an indirect block
     @classmethod
     def make_inode(cls, is_valid=False, direct_blocks=[0]*5, indirect_loc=0):
-        arr = np.zeros(shape=(Inode.size), dtype=Block.data_type)
-        arr[0] = is_valid
+        arr = np.zeros(shape=(Inode.num_indexes), dtype=Block.data_type)
+        arr[0] = True
         arr[1] = Inode.size
         index = 0
         for i in range(2, len(direct_blocks)):
             arr[i] = direct_blocks[index]
             index += 1
         arr[2 + len(direct_blocks)] = indirect_loc
-        return bytearray(arr)
+        return arr
 
 
 class InodeBlock(Block):
@@ -155,7 +156,7 @@ class InodeBlock(Block):
 
     @classmethod
     def make_block(cls, block_size):
-        num_inodes = int( block_size / Inode.size)
+        num_inodes = block_size // Inode.size
         merged_inodes = np.zeros(shape=(block_size), dtype=Block.data_type)
         inode = Inode.make_inode()
         index = 0
@@ -163,7 +164,7 @@ class InodeBlock(Block):
             for item in inode:
                 merged_inodes[index] = item
                 index += 1
-        return bytearray(merged_inodes)
+        return merged_inodes
 
 
 class IndirectBlock(Block):

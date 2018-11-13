@@ -1,8 +1,9 @@
 import include.blocks as blocks
+import struct
 
 class Disk:
 
-    BLOCK_SIZE = 16 # 4096
+    BLOCK_SIZE = 512 # 4096
     ENCODING = 'utf8'
 
     inodebitmap = None
@@ -26,11 +27,14 @@ class Disk:
         byte_array, block_data = [], []
 
         open_file.seek(start_address)
-        for _ in range(Disk.BLOCK_SIZE):
-            byte_array.append(open_file.read(1))
+        # for _ in range(Disk.BLOCK_SIZE):
+        #     byte_array.append(open_file.read(1))
 
-        for item in byte_array:
-            block_data.append(int.from_bytes(item, 'little'))
+        # for item in byte_array:
+        #     block_data.append(int.from_bytes(item, 'little'))
+
+        for _ in range(Disk.BLOCK_SIZE//4):
+            block_data.append(struct.unpack('i', open_file.read(4))[0])
 
         return block_data
 
@@ -76,6 +80,9 @@ class Disk:
         Disk.disk_write(open_disk, 0, superblock)
         for i in range(superblock[2]): # superblock[2] is number of inodeblocks
             Disk.disk_write(open_disk, superblock[8] + i, inodeblock) # superblock[8] is the location of the first inodeblock
+
+        print(Disk.disk_read(open_disk, 3))
+        print(Disk.disk_read(open_disk, 0))
 
     @classmethod
     def load_bitmaps(cls, open_file):
