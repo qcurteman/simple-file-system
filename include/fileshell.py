@@ -83,7 +83,7 @@ class fileshell:
         elif command_root == 'disks':
             return_val = fileshell.shell_disks()
         elif command_root == 'scan':
-            return_val = fileshell.scan_disk()
+            return_val = fileshell.shell_scan()
         
         return return_val
 
@@ -171,3 +171,7 @@ class fileshell:
             else:
                 print('    {}'.format(disk))
         
+    @classmethod
+    def shell_scan(cls, ):
+        print('scanning disk...')
+        filesystem.fs_scan()

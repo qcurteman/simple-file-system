@@ -1,7 +1,9 @@
-
 import numpy as np
+import include.diskpy as diskpy
+
 class Block:
     data_type = 'int32'
+    block_size = diskpy.Disk.BLOCK_SIZE
         
 
 class Superblock:
@@ -30,8 +32,8 @@ class Superblock:
             first_inodeblock (arr[8]):
                 - Blocknumber where the first inodeblock is stored
     '''
-    def __init__(self, superblock=None):
-        if superblock != None:
+    def __init__(self, superblock=[]):
+        if any(superblock):
             self.magic_number = superblock[0]
             self.nblocks = superblock[1] # number of blocks on disk. Includes the super block
             self.ninodeblocks = superblock[2] # number of blocks set aside for storing inodes
@@ -44,57 +46,18 @@ class Superblock:
 
 
     @classmethod
-    def make_block(cls, block_size, nblocks=50, ninodeblocks=4,):
-        arr = np.zeros(shape=(block_size), dtype=Block.data_type)
+    def make_block(cls, nblocks=50, ninodeblocks=4,):
+        arr = np.zeros(shape=(Block.block_size), dtype=Block.data_type)
         arr[0] = 11111
         arr[1] = nblocks
         arr[2] = ninodeblocks 
-        arr[3] = block_size // Inode.size
+        arr[3] = Block.block_size // Inode.size
         arr[4] = 0
         arr[5] = 1
         arr[6] = 2
         arr[7] = arr[2] + arr[6] + 1 # put it right after the last inodeblock 
         arr[8] = arr[6] + 1 # put it right after the inodebitmap block
         return arr
-
-class BlockBitmap(Block):
-
-    '''
-    BlockBitmap structure
-
-    Attributes:
-
-        block_size:
-            - Size of a single block.
-        arraysize:
-            - Equal to the total number of certain block types (inode or data blocks) on the disk 
-        blockbitmap:
-            - Actual bitmap
-
-    Methods:
-
-    '''
-
-    def __init__(self, block_size, arraysize, blockNbr):
-        self.blockNbr = blockNbr
-        self.arraysize = arraysize
-        self.blockbitmap = np.zeros(shape=(block_size, 1), dtype=data_type)
-
-    def init(self):
-        # initialize the array with FREE, USED, and BAD
-        pass
-
-    def setFree(self, atOffset):
-        pass
-
-    def setUsed(self, atOffset):
-        pass
-
-    def findFree(self):
-        pass
-
-    def saveToDisk(self): # save the contents of "self.blockbitmap" to the disk
-        pass
 
 
 class Inode:
@@ -117,12 +80,17 @@ class Inode:
 
 
     size = 32 # logical size of inode data in bytes
-    num_indexes = 8 # This is the number of indexes 
+    num_indexes = 8 # This is the number of indexes
+    num_direct_pointers = 5
 
-# def __init__(self,):
-    #     self.is_valid = False # 1 if the inode is valid (has been created) and is 0 otherwise.
-    #     self.direct = [] * 5 # points to data blocks
-    #     self.indirect = 0 # points to an indirect block
+    def __init__(self, inode):
+        self.is_valid = inode[0]
+        self.size = inode[1]
+        self.direct = [] # points to data blocks
+        for i in range(Inode.num_direct_pointers):
+            self.direct.append(inode[i + 2])
+        self.indirect = inode[2 + Inode.num_direct_pointers] # points to an indirect block
+
     @classmethod
     def make_inode(cls, is_valid=False, direct_blocks=[0]*5, indirect_loc=0):
         arr = np.zeros(shape=(Inode.num_indexes), dtype=Block.data_type)
@@ -136,7 +104,7 @@ class Inode:
         return arr
 
 
-class InodeBlock(Block):
+class InodeBlock:
     
     '''
         InodeBlock structure
@@ -145,19 +113,16 @@ class InodeBlock(Block):
     
     '''
 
-
-    # consists of 128 Inodes
-    # def __init__(self, start_address):
-    #     super().__init__(start_address)
-    #     num_inodes = int( Block.size / Inode.size)
-    #     self.inodes = []
-    #     for _ in range(num_inodes):
-    #         self.inodes.append(Inode())
+    def __init__(self, inodeblock):
+        self.num_inodes = Block.block_size // Inode.size
+        self.inodes = []
+        for i in range(self.num_inodes):
+            self.inodes.append(Inode(inodeblock[i*Inode.num_indexes : (i+1)*Inode.num_indexes]))
 
     @classmethod
-    def make_block(cls, block_size):
-        num_inodes = block_size // Inode.size
-        merged_inodes = np.zeros(shape=(block_size), dtype=Block.data_type)
+    def make_block(cls, ):
+        num_inodes = Block.block_size // Inode.size
+        merged_inodes = np.zeros(shape=(Block.block_size), dtype=Block.data_type)
         inode = Inode.make_inode()
         index = 0
         for _ in range(num_inodes):
@@ -167,13 +132,27 @@ class InodeBlock(Block):
         return merged_inodes
 
 
-class IndirectBlock(Block):
+class IndirectBlock:
 
     # consists of 1024 4-byte pointers that point to data blocks
     def __init__(self, ):
         pass
 
 
-class DataBlock(Block):
-    def __init__(self, block_size):
-        self.data = np.zeros(shape=(block_size, 1), dtype=Block.data_type)
+class DataBlock:
+    def __init__(self, ):
+        self.data = np.zeros(shape=(Block.block_size, 1), dtype=Block.data_type)
+
+
+def initialize_blocks(open_disk, disk_size):
+    superblock_raw = Superblock.make_block(nblocks=disk_size)
+    inodeblock_raw = InodeBlock.make_block()
+    superblock = Superblock(superblock_raw)
+
+    diskpy.Disk.disk_write(open_disk, 0, superblock_raw)
+    for i in range(superblock.ninodeblocks):
+        diskpy.Disk.disk_write(open_disk, superblock.first_inodeblock + i, inodeblock_raw)
+
+
+    print(diskpy.Disk.disk_read(open_disk, 0))
+    print(diskpy.Disk.disk_read(open_disk, 3))
