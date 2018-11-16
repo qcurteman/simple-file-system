@@ -17,7 +17,7 @@ class fileshell:
                 'help': 'List all available commands.',
                 'mount': '<diskname> Mount a disk for writing and reading.',
                 'quit': 'Quit running any current command.',
-                'scan': 'Create bitmap based on currently mounted disk.'}
+                'scan': 'Create bitmaps based on the currently mounted disk.'}
 
     @classmethod
     def open_disk(cls, diskname, numblocks):

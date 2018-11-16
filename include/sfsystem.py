@@ -28,8 +28,8 @@ class filesystem:
         open_file = diskpy.Disk.disk_open(diskname)
         filesystem.inodebitmap, filesystem.databitmap = bitmap.load_bitmaps(open_file)
         
-        temp = diskpy.Disk.disk_read(open_file, 2)
-        print(temp)
+        # temp = diskpy.Disk.disk_read(open_file, 2)
+        # print(temp)
         
         diskpy.Disk.disk_close(open_file)
         filesystem.mounted_disk = diskname
@@ -78,4 +78,6 @@ class filesystem:
     
     @classmethod
     def fs_scan(cls, ):
+        open_file = diskpy.Disk.disk_open(filesystem.mounted_disk)
         filesystem.inodebitmap, filesystem.databitmap = bitmap.load_bitmaps(open_file)
+        diskpy.Disk.disk_close(open_file)

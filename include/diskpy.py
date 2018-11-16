@@ -3,13 +3,13 @@ import struct
 
 class Disk:
 
-    BLOCK_SIZE = 512 # 4096
+    BLOCK_SIZE_BYTES = 512 # 4096
     ENCODING = 'utf8'
 
     # a row is a block
     @classmethod
     def disk_init(cls, diskname, nbrOfBlocks=32):
-        blank_block = bytearray(Disk.BLOCK_SIZE)
+        blank_block = bytearray(Disk.BLOCK_SIZE_BYTES)
         with open('data/{}'.format(diskname), 'wb+') as f:
             [ f.write(blank_block) for _ in range(int(nbrOfBlocks)) ]
                 
@@ -20,7 +20,7 @@ class Disk:
 
     @classmethod
     def disk_read(cls, open_file, blockNumber):
-        start_address = Disk.BLOCK_SIZE * blockNumber
+        start_address = Disk.BLOCK_SIZE_BYTES * blockNumber
         byte_array, block_data = [], []
 
         open_file.seek(start_address)
@@ -30,14 +30,14 @@ class Disk:
         # for item in byte_array:
         #     block_data.append(int.from_bytes(item, 'little'))
 
-        for _ in range(Disk.BLOCK_SIZE//4):
+        for _ in range(Disk.BLOCK_SIZE_BYTES // 4):
             block_data.append(struct.unpack('i', open_file.read(4))[0])
 
         return block_data
 
     @classmethod
     def disk_write(cls, open_file, blockNumber, data): 
-        start_address = Disk.BLOCK_SIZE * blockNumber
+        start_address = Disk.BLOCK_SIZE_BYTES * blockNumber
         open_file.seek(start_address)
 
         # Check the data type to determine how to convert to binary
@@ -47,6 +47,11 @@ class Disk:
             byte_data = bytearray(data)
 
         open_file.write(byte_data[:])
+
+        # for debugging
+        for i in range(8):
+            print('Block ', i)
+            print(Disk.disk_read(open_file, i))
 
     @classmethod
     def disk_size(cls, open_file):

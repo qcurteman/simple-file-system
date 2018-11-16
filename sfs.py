@@ -12,7 +12,7 @@ import click
 def run_file_shell(diskname, blocknum):
     interpreted_command = True
     # fs.open_disk(diskname, blocknum)
-    fs.open_disk('qdisk7.bin', 64) # for debugging
+    fs.open_disk('qdisk1.bin', 350) # for debugging
 
     while interpreted_command != False:
         command = input('sfs>')

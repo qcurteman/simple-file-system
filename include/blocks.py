@@ -3,7 +3,7 @@ import include.diskpy as diskpy
 
 class Block:
     data_type = 'int32'
-    block_size = diskpy.Disk.BLOCK_SIZE
+    block_size_bytes = diskpy.Disk.BLOCK_SIZE_BYTES
         
 
 class Superblock:
@@ -47,16 +47,17 @@ class Superblock:
 
     @classmethod
     def make_block(cls, nblocks=50, ninodeblocks=4,):
-        arr = np.zeros(shape=(Block.block_size), dtype=Block.data_type)
+        arr = np.zeros(shape=(Block.block_size_bytes // 4), dtype=Block.data_type)
         arr[0] = 11111
         arr[1] = nblocks
         arr[2] = ninodeblocks 
-        arr[3] = Block.block_size // Inode.size
+        arr[3] = Block.block_size_bytes // Inode.size_bytes
         arr[4] = 0
         arr[5] = 1
         arr[6] = 2
         arr[7] = arr[2] + arr[6] + 1 # put it right after the last inodeblock 
-        arr[8] = arr[6] + 1 # put it right after the inodebitmap block
+        arr[8] = arr[6] + 1 # put it right after the inodebitmap block   
+
         return arr
 
 
@@ -79,26 +80,26 @@ class Inode:
     '''
 
 
-    size = 32 # logical size of inode data in bytes
+    size_bytes = 32 # logical size of inode data in bytes
     num_indexes = 8 # This is the number of indexes
-    num_direct_pointers = 5
+    num_direct_pointers = 2
     FREE = 0
     USED = 1
     BAD = 99
 
     def __init__(self, inode):
         self.is_valid = inode[0]
-        self.size = inode[1]
+        self.size_bytes = inode[1]
         self.direct = [] # points to data blocks
         for i in range(Inode.num_direct_pointers):
             self.direct.append(inode[i + 2])
         self.indirect = inode[2 + Inode.num_direct_pointers] # points to an indirect block
 
     @classmethod
-    def make_inode(cls, is_valid=0, direct_blocks=[0]*5, indirect_loc=0):
+    def make_inode(cls, is_valid=0, direct_blocks=[0]*num_direct_pointers, indirect_loc=0):
         arr = np.zeros(shape=(Inode.num_indexes), dtype=Block.data_type)
         arr[0] = Inode.FREE
-        arr[1] = Inode.size
+        arr[1] = Inode.size_bytes
         index = 0
         for i in range(2, len(direct_blocks)):
             arr[i] = direct_blocks[index]
@@ -117,15 +118,15 @@ class InodeBlock:
     '''
 
     def __init__(self, inodeblock):
-        self.num_inodes = Block.block_size // Inode.size
+        self.num_inodes = Block.block_size_bytes // Inode.size_bytes
         self.inodes = []
         for i in range(self.num_inodes):
             self.inodes.append(Inode(inodeblock[i*Inode.num_indexes : (i+1)*Inode.num_indexes]))
 
     @classmethod
     def make_block(cls, ):
-        num_inodes = Block.block_size // Inode.size
-        merged_inodes = np.zeros(shape=(Block.block_size), dtype=Block.data_type)
+        num_inodes = Block.block_size_bytes // Inode.size_bytes
+        merged_inodes = np.zeros(shape=(Block.block_size_bytes // 4), dtype=Block.data_type)
         inode = Inode.make_inode()
         index = 0
         for _ in range(num_inodes):
@@ -144,7 +145,7 @@ class IndirectBlock:
 
 class DataBlock:
     def __init__(self, ):
-        self.data = np.zeros(shape=(Block.block_size, 1), dtype=Block.data_type)
+        self.data = np.zeros(shape=(Block.block_size_bytes // 4, 1), dtype=Block.data_type)
 
 
 def initialize_blocks(open_disk, disk_size):
@@ -155,7 +156,3 @@ def initialize_blocks(open_disk, disk_size):
     diskpy.Disk.disk_write(open_disk, 0, superblock_raw)
     for i in range(superblock.ninodeblocks):
         diskpy.Disk.disk_write(open_disk, superblock.first_inodeblock + i, inodeblock_raw)
-
-
-    print(diskpy.Disk.disk_read(open_disk, 0))
-    print(diskpy.Disk.disk_read(open_disk, 3))
