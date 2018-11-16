@@ -82,6 +82,9 @@ class Inode:
     size = 32 # logical size of inode data in bytes
     num_indexes = 8 # This is the number of indexes
     num_direct_pointers = 5
+    FREE = 0
+    USED = 1
+    BAD = 99
 
     def __init__(self, inode):
         self.is_valid = inode[0]
@@ -92,9 +95,9 @@ class Inode:
         self.indirect = inode[2 + Inode.num_direct_pointers] # points to an indirect block
 
     @classmethod
-    def make_inode(cls, is_valid=False, direct_blocks=[0]*5, indirect_loc=0):
+    def make_inode(cls, is_valid=0, direct_blocks=[0]*5, indirect_loc=0):
         arr = np.zeros(shape=(Inode.num_indexes), dtype=Block.data_type)
-        arr[0] = True
+        arr[0] = Inode.FREE
         arr[1] = Inode.size
         index = 0
         for i in range(2, len(direct_blocks)):

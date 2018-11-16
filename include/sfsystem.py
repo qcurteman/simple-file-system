@@ -1,7 +1,7 @@
 
 import include.diskpy as diskpy
 import include.blocks as blocks
-import include.bitmaps as bitmaps
+import include.bitmaps as bitmap
 from os import listdir, getcwd
 
 class filesystem:
@@ -26,7 +26,11 @@ class filesystem:
     @classmethod
     def fs_mount(cls, diskname):
         open_file = diskpy.Disk.disk_open(diskname)
-        filesystem.inodebitmap, filesystem.databitmap = bitmaps.load_bitmaps(open_file)
+        filesystem.inodebitmap, filesystem.databitmap = bitmap.load_bitmaps(open_file)
+        
+        temp = diskpy.Disk.disk_read(open_file, 2)
+        print(temp)
+        
         diskpy.Disk.disk_close(open_file)
         filesystem.mounted_disk = diskname
 
@@ -74,4 +78,4 @@ class filesystem:
     
     @classmethod
     def fs_scan(cls, ):
-        filesystem.inodebitmap, filesystem.databitmap = bitmaps.load_bitmaps(open_file)
+        filesystem.inodebitmap, filesystem.databitmap = bitmap.load_bitmaps(open_file)
