@@ -17,7 +17,7 @@ class fileshell:
                 'help': 'List all available commands.',
                 'mount': '<diskname> Mount a disk for writing and reading.',
                 'quit': 'Quit running any current command.',
-                'scan': 'Create bitmap based on currently mounted disk.'}
+                'scan': 'Create bitmaps based on the currently mounted disk.'}
 
     @classmethod
     def open_disk(cls, diskname, numblocks):
@@ -83,7 +83,7 @@ class fileshell:
         elif command_root == 'disks':
             return_val = fileshell.shell_disks()
         elif command_root == 'scan':
-            return_val = fileshell.scan_disk()
+            return_val = fileshell.shell_scan()
         
         return return_val
 
@@ -171,3 +171,7 @@ class fileshell:
             else:
                 print('    {}'.format(disk))
         
+    @classmethod
+    def shell_scan(cls, ):
+        print('scanning disk...')
+        filesystem.fs_scan()
