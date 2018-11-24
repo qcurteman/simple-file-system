@@ -17,6 +17,7 @@ class filesystem:
         disk_size = diskpy.Disk.disk_size(open_disk)
         diskpy.Disk.disk_init(filesystem.mounted_disk, disk_size)
         blocks.initialize_blocks(open_disk, disk_size)
+        filesystem.fs_scan()
         diskpy.Disk.disk_close(open_disk)
 
     @classmethod
@@ -92,7 +93,10 @@ class filesystem:
 
     @classmethod
     def fs_open(cls, filename):
-        pass
+        # open_file = diskpy.Disk.disk_open(filesystem.mounted_disk)
+        # diskpy.Disk.disk_write(open_file, 7, 'waterfungi')
+        # diskpy.Disk.disk_close(open_file)
+        blocks.DataBlock.make_block()
 
     @classmethod
     def fs_display(cls, filename):

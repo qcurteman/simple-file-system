@@ -145,7 +145,25 @@ class IndirectBlock:
 
 class DataBlock:
     def __init__(self, ):
-        self.data = np.zeros(shape=(Block.block_size_bytes // 4, 1), dtype=Block.data_type)
+        pass
+
+
+    @classmethod
+    def make_block(cls, ):
+        data = np.zeros(shape=(Block.block_size_bytes // 4, 2), dtype=Block.data_type)
+        data[0][0] = 1
+        data[0][1] = np.int32('.')
+
+        data[1][0] = 1
+        data[1][1] = np.int32('..')
+
+        data[2][0] = 2
+        data[2][1] = np.int32('etc')
+
+        diskpy.Disk.disk_write(diskpy.Disk.disk_open('qdisk1.bin'), 7, data)
+
+
+
 
 
 def initialize_blocks(open_disk, disk_size):
