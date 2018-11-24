@@ -8,16 +8,19 @@ class fileshell:
     commands = {'cat': '<inode> Cat command.',
                 'copyin': '<file> <inode> Copy an entire file in.',
                 'copyout': '<inode> <file> Copy an entire file out.',
-                'create': 'Create a new file.',
                 'debug': 'Debug the current disk.',
                 'delete': '<inode> Delete a chosen disk.',
                 'disks': 'List the disks available and the mounted one.',
+                'display': '<filename> Display contents of specified file.',
                 'exit': 'Exit the shell.',
                 'format': 'Format the current disk.', 
                 'help': 'List all available commands.',
+                'ls': 'List all segments in current directory.',
                 'mount': '<diskname> Mount a disk for writing and reading.',
+                'open' : '<filename> Open the specified file',
                 'quit': 'Quit running any current command.',
-                'scan': 'Create bitmaps based on the currently mounted disk.'}
+                'scan': 'Create bitmaps based on the currently mounted disk.',
+                'touch': '<filename> Create a new file in current directory.', }
 
     @classmethod
     def open_disk(cls, diskname, numblocks):
@@ -48,8 +51,6 @@ class fileshell:
                 return_val = fileshell.continue_shell
         elif command_root == 'debug':
             return_val = fileshell.shell_debug()
-        elif command_root == 'create':
-            return_val = fileshell.shell_create()
         elif command_root == 'delete':
             if len(arguments) == 1:
                 return_val = fileshell.shell_delete(arguments)
@@ -84,6 +85,26 @@ class fileshell:
             return_val = fileshell.shell_disks()
         elif command_root == 'scan':
             return_val = fileshell.shell_scan()
+        elif command_root == 'touch':
+            if len(arguments) == 1:
+                return_val = fileshell.shell_touch(arguments)
+            else:
+                print('ERROR: Received {} arguments but expected 1.'.format(len(arguments)))
+                return_val = fileshell.continue_shell
+        elif command_root == 'ls':
+            return_val = fileshell.shell_ls()
+        elif command_root == 'open':
+            if len(arguments) == 1:
+                return_val = fileshell.shell_open(arguments)
+            else:
+                print('ERROR: Received {} arguments but expected 1.'.format(len(arguments)))
+                return_val = fileshell.continue_shell
+        elif command_root == 'display':
+            if len(arguments) == 1:
+                return_val = fileshell.shell_display(arguments)
+            else:
+                print('ERROR: Received {} arguments but expected 1.'.format(len(arguments)))
+                return_val = fileshell.continue_shell
         
         return return_val
 
@@ -112,11 +133,6 @@ class fileshell:
     @classmethod
     def shell_debug(cls,):
         print('debugging...') # Implemented with the filesystem
-        return fileshell.continue_shell
-
-    @classmethod
-    def shell_create(cls,):
-        print('creating...') # Implemented with the filesystem
         return fileshell.continue_shell
 
     @classmethod
@@ -175,3 +191,29 @@ class fileshell:
     def shell_scan(cls, ):
         print('scanning disk...')
         filesystem.fs_scan()
+
+    @classmethod
+    def shell_touch(cls, *args):
+        filename = list(args)[0][0]
+        # TODO: Make sure there isn't already a file with the same name
+        filesystem.fs_touch(filename)
+        return fileshell.continue_shell
+
+    @classmethod
+    def shell_ls(cls, ):
+        filesystem.fs_ls()
+        return fileshell.continue_shell
+
+    @classmethod
+    def shell_open(cls, *args):
+        filename = list(args)[0][0]
+        # TODO: Check if the file even exists
+        filesystem.fs_open(filename)
+        return fileshell.continue_shell
+
+    @classmethod
+    def shell_display(cls, *args):
+        filename = list(args)[0][0]
+        # TODO: Check if the file even exists
+        filesystem.fs_display(filename)
+        return fileshell.continue_shell

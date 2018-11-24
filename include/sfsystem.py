@@ -81,3 +81,19 @@ class filesystem:
         open_file = diskpy.Disk.disk_open(filesystem.mounted_disk)
         filesystem.inodebitmap, filesystem.databitmap = bitmap.load_bitmaps(open_file)
         diskpy.Disk.disk_close(open_file)
+
+    @classmethod
+    def fs_touch(cls, filename):
+        pass
+
+    @classmethod
+    def fs_ls(cls, ):
+        pass
+
+    @classmethod
+    def fs_open(cls, filename):
+        pass
+
+    @classmethod
+    def fs_display(cls, filename):
+        pass
