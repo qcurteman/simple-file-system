@@ -17,7 +17,7 @@ class filesystem:
         disk_size = diskpy.Disk.disk_size(open_disk)
         diskpy.Disk.disk_init(filesystem.mounted_disk, disk_size)
         blocks.initialize_blocks(open_disk, disk_size)
-        filesystem.fs_scan()
+        # filesystem.fs_scan(open_disk)
         diskpy.Disk.disk_close(open_disk)
 
     @classmethod
@@ -26,13 +26,7 @@ class filesystem:
 
     @classmethod
     def fs_mount(cls, diskname):
-        open_file = diskpy.Disk.disk_open(diskname)
-        filesystem.inodebitmap, filesystem.databitmap = bitmap.load_bitmaps(open_file)
-        
-        # temp = diskpy.Disk.disk_read(open_file, 2)
-        # print(temp)
-        
-        diskpy.Disk.disk_close(open_file)
+        filesystem.fs_scan()
         filesystem.mounted_disk = diskname
 
     @classmethod
@@ -74,14 +68,18 @@ class filesystem:
         diskpy.Disk.disk_init(diskname, numblocks)
         open_disk = diskpy.Disk.disk_open(diskname)
         blocks.initialize_blocks(open_disk, numblocks)
+        # filesystem.fs_scan(open_disk)
         diskpy.Disk.disk_close(open_disk)
         return diskname
     
     @classmethod
-    def fs_scan(cls, ):
-        open_file = diskpy.Disk.disk_open(filesystem.mounted_disk)
-        filesystem.inodebitmap, filesystem.databitmap = bitmap.load_bitmaps(open_file)
-        diskpy.Disk.disk_close(open_file)
+    def fs_scan(cls, open_file=None):
+        if open_file == None:
+            open_file1 = diskpy.Disk.disk_open(filesystem.mounted_disk)
+            filesystem.inodebitmap, filesystem.databitmap = bitmap.load_bitmaps(open_file1)
+            diskpy.Disk.disk_close(open_file1)
+        else:
+            filesystem.inodebitmap, filesystem.databitmap = bitmap.load_bitmaps(open_file)
 
     @classmethod
     def fs_touch(cls, filename):

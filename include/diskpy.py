@@ -40,16 +40,30 @@ class Disk:
         start_address = Disk.BLOCK_SIZE_BYTES * blockNumber
         open_file.seek(start_address)
 
-        # Check the data type to determine how to convert to binary
+        # if type(data) == list:
+        #     for item in data:
+        #         if type(item) == str:
+        #             # byte_data += bytes(item, Disk.ENCODING)
+        #             open_file.write(item.encode('ascii'))
+        #             start_address += 24
+        #             open_file.seek(start_address)
+        #         else:
+        #             # temp = item)
+        #             # byte_data += bytes(item)
+        #             open_file.write(bytearray(item))
+        #             start_address += 4
+        #             open_file.seek(start_address)
+        # else:
+        #     # Check the data type to determine how to convert to binary
         if type(data) == str:
             byte_data = bytearray(data, Disk.ENCODING)
         else:
             byte_data = bytearray(data)
 
-        open_file.write(byte_data[:])
+            open_file.write(byte_data[:])
 
         # for debugging
-        for i in range(8):
+        for i in range(10):
             print('Block ', i)
             print(Disk.disk_read(open_file, i))
 

@@ -150,17 +150,23 @@ class DataBlock:
 
     @classmethod
     def make_block(cls, ):
-        data = np.zeros(shape=(Block.block_size_bytes // 4, 2), dtype=Block.data_type)
-        data[0][0] = 1
-        data[0][1] = np.int32('.')
+        #data = np.zeros(shape=(Block.block_size_bytes // 4, 2), dtype='object')
+        
+        data = []
+        data.append(1)
+        data.append('quentin')
 
-        data[1][0] = 1
-        data[1][1] = np.int32('..')
+        data.append(21)
+        data.append('moriah')
 
-        data[2][0] = 2
-        data[2][1] = np.int32('etc')
 
-        diskpy.Disk.disk_write(diskpy.Disk.disk_open('qdisk1.bin'), 7, data)
+        # data[1][0] = 1
+        # data[1][1] = '..'
+
+        # data[2][0] = 2
+        # data[2][1] = 'etc'
+
+        diskpy.Disk.disk_write(diskpy.Disk.disk_open('qdisk1.bin'), 8, data)
 
 
 
