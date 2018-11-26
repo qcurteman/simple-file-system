@@ -36,7 +36,9 @@ class bitmap:
         if self.maptype == 'inode':
             self.init_inode(open_file, superblock)
         elif self.maptype == 'data':
-            self.init_data(open_file, superblock)
+            pass
+            # TODO: Figure out what this is supposed to be scanning cuz i'm having the prob where 1 block isn't big enough
+            # self.init_data(open_file, superblock)
         else:
             raise('ERROR: Incorrect maptype set.')
 
