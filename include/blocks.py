@@ -82,7 +82,7 @@ class Inode:
 
     size_bytes = 32 # logical size of inode data in bytes
     num_indexes = 8 # This is the number of indexes
-    num_direct_pointers = 2
+    num_direct_pointers = 5
     FREE = 0
     USED = 1
     BAD = 99
@@ -107,6 +107,20 @@ class Inode:
         arr[2 + len(direct_blocks)] = indirect_loc
         return arr
 
+    @classmethod
+    def get_inode(cls, open_file, inode_location):
+        superblock = Superblock(diskpy.Disk.disk_read(open_file, 0))
+
+        val = inode_location
+        inodeblock_num = 0
+        while val > superblock.ninodes:
+            val -= superblock.ninodes
+            inodeblock_num += 1
+
+        inodeblock = InodeBlock(diskpy.Disk.disk_read(open_file, superblock.first_inodeblock + inodeblock_num))
+        return inodeblock.inodes[val]
+        
+
 
 class InodeBlock:
     
@@ -122,6 +136,21 @@ class InodeBlock:
         self.inodes = []
         for i in range(self.num_inodes):
             self.inodes.append(Inode(inodeblock[i*Inode.num_indexes : (i+1)*Inode.num_indexes]))
+
+    def save_block(self, open_file, location):
+        merged_inodes = np.zeros(shape=(Block.block_size_bytes // 4), dtype=Block.data_type)
+        index = 0
+        for i in range(self.num_inodes):
+            merged_inodes[index] = self.inodes[i].is_valid
+            index+=1
+            merged_inodes[index] = self.inodes[i].size_bytes
+            index+=1
+            for item in self.inodes[i].direct:
+                merged_inodes[index] = item
+                index+=1
+            merged_inodes[index] = self.inodes[i].indirect
+            index+=1
+        diskpy.Disk.disk_write(open_file, location, merged_inodes)
 
     @classmethod
     def make_block(cls, ):
@@ -144,33 +173,44 @@ class IndirectBlock:
 
 
 class DataBlock:
-    def __init__(self, ):
-        pass
-
+    def __init__(self, open_file, datablock): #TODO: Figure out how to make it so 'open_file' isn't necessary
+        self.data = []
+        offset = 0
+        for _ in range(Block.block_size_bytes // 4):
+            temp_int = diskpy.Disk.disk_read_int(open_file, datablock, offset)
+            offset += 4
+            temp_str = diskpy.Disk.disk_read_str(open_file, datablock, offset)
+            offset += 28
+            self.data.append({'node': temp_int, 'name': temp_str })
 
     @classmethod
     def make_block(cls, ):
-        data = np.zeros(shape=(Block.block_size_bytes // 4, 2), dtype=Block.data_type)
-        data[0][0] = 1
-        data[0][1] = np.int32('.')
+        data = []
+        data.append(1)
+        data.append('.')
+        data.append(1)
+        data.append('..')
+        data.append(2)
+        data.append('etc')
+        data.append(3)
+        data.append('bin')
+        return data
 
-        data[1][0] = 1
-        data[1][1] = np.int32('..')
-
-        data[2][0] = 2
-        data[2][1] = np.int32('etc')
-
-        diskpy.Disk.disk_write(diskpy.Disk.disk_open('qdisk1.bin'), 7, data)
+    @classmethod
+    def get_data(cls, open_file, block_offset):
+        superblock = Superblock(diskpy.Disk.disk_read(open_file, 0))
+        data = DataBlock(open_file, superblock.first_datablock + block_offset)
+        return data
 
 
 
-
-
-def initialize_blocks(open_disk, disk_size):
+def initialize_blocks(open_file, disk_size):
     superblock_raw = Superblock.make_block(nblocks=disk_size)
     inodeblock_raw = InodeBlock.make_block()
     superblock = Superblock(superblock_raw)
 
-    diskpy.Disk.disk_write(open_disk, 0, superblock_raw)
+    # write the superblock to disk
+    diskpy.Disk.disk_write(open_file, 0, superblock_raw)
+    # write the inodes to disk
     for i in range(superblock.ninodeblocks):
-        diskpy.Disk.disk_write(open_disk, superblock.first_inodeblock + i, inodeblock_raw)
+        diskpy.Disk.disk_write(open_file, superblock.first_inodeblock + i, inodeblock_raw)

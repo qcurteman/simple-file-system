@@ -19,16 +19,33 @@ class Disk:
         return fl
 
     @classmethod
+    def disk_read_int(cls, open_file, blockNumber, offset):
+        start_address = Disk.BLOCK_SIZE_BYTES * blockNumber
+        int_val = []
+        open_file.seek(start_address + offset)
+        int_val = struct.unpack('i', open_file.read(4))[0]
+        return int_val
+
+    @classmethod
+    def disk_read_str(cls, open_file, blockNumber, offset):
+        start_address = Disk.BLOCK_SIZE_BYTES * blockNumber
+        str_val = []
+        open_file.seek(start_address + offset)
+        for _ in range(28):
+            byte = open_file.read(1)
+            str_temp = byte.decode('utf8')
+            if str_temp != '\x00':
+                str_val.append(str_temp)
+        # str_val1 = open_file.read(28)
+        # str_val = str_val1.decode('utf8')
+        return ''.join(str_val)
+
+    @classmethod
     def disk_read(cls, open_file, blockNumber):
         start_address = Disk.BLOCK_SIZE_BYTES * blockNumber
-        byte_array, block_data = [], []
+        block_data = []
 
         open_file.seek(start_address)
-        # for _ in range(Disk.BLOCK_SIZE):
-        #     byte_array.append(open_file.read(1))
-
-        # for item in byte_array:
-        #     block_data.append(int.from_bytes(item, 'little'))
 
         for _ in range(Disk.BLOCK_SIZE_BYTES // 4):
             block_data.append(struct.unpack('i', open_file.read(4))[0])
@@ -36,20 +53,33 @@ class Disk:
         return block_data
 
     @classmethod
-    def disk_write(cls, open_file, blockNumber, data): 
-        start_address = Disk.BLOCK_SIZE_BYTES * blockNumber
+    def disk_write(cls, open_file, blockNumber, data, start_address=None): 
+        if start_address == None:
+            start_address = Disk.BLOCK_SIZE_BYTES * blockNumber
+        
         open_file.seek(start_address)
 
-        # Check the data type to determine how to convert to binary
-        if type(data) == str:
-            byte_data = bytearray(data, Disk.ENCODING)
+        if type(data) == list:
+            for item in data:
+                open_file.seek(start_address)
+                if type(item) == str:
+                    open_file.write(item.encode('utf8'))
+                    start_address += 28
+                else:
+                    temp = bytes([item])
+                    open_file.write(temp[:])
+                    start_address += 4
         else:
-            byte_data = bytearray(data)
+            # Check the data type to determine how to convert to binary
+            if type(data) == str:
+                byte_data = bytearray(data, Disk.ENCODING)
+            else:
+                byte_data = bytearray(data)
 
-        open_file.write(byte_data[:])
+                open_file.write(byte_data[:])
 
         # for debugging
-        for i in range(8):
+        for i in range(10):
             print('Block ', i)
             print(Disk.disk_read(open_file, i))
 
