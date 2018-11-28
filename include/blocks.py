@@ -172,14 +172,14 @@ class IndirectBlock:
         pass
 
 
-class DataBlock:
-    def __init__(self, open_file, datablock): #TODO: Figure out how to make it so 'open_file' isn't necessary
+class DirectoryBlock:
+    def __init__(self, open_file, directoryblock): #TODO: Figure out how to make it so 'open_file' isn't necessary
         self.data = []
         offset = 0
         for _ in range(Block.block_size_bytes // 4):
-            temp_int = diskpy.Disk.disk_read_int(open_file, datablock, offset)
+            temp_int = diskpy.Disk.disk_read_int(open_file, directoryblock, offset)
             offset += 4
-            temp_str = diskpy.Disk.disk_read_str(open_file, datablock, offset)
+            temp_str = diskpy.Disk.disk_read_str(open_file, directoryblock, offset)
             offset += 28
             self.data.append({'node': temp_int, 'name': temp_str })
 
@@ -197,9 +197,19 @@ class DataBlock:
         return data
 
     @classmethod
+    def add_directory(cls, current_directory, name, free_inode):
+        '''
+        To add a new directory:
+        1) find a new free inode 
+        2) add this data to a free location in the inode that is storing the current directory info.
+        '''
+
+        return [inode_loc, name]
+
+    @classmethod
     def get_data(cls, open_file, block_offset):
         superblock = Superblock(diskpy.Disk.disk_read(open_file, 0))
-        data = DataBlock(open_file, superblock.first_datablock + block_offset)
+        data = DirectoryBlock(open_file, superblock.first_datablock + block_offset)
         return data
 
 

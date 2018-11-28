@@ -16,8 +16,10 @@ class fileshell:
                 'format': 'Format the current disk.', 
                 'help': 'List all available commands.',
                 'ls': 'List all segments in current directory.',
+                'mkdir': '<directoryname> Make a new directory in the current directory',
                 'mount': '<diskname> Mount a disk for writing and reading.',
                 'open' : '<filename> Open the specified file',
+                'pwd': 'Print out the current directory.',
                 'quit': 'Quit running any current command.',
                 'scan': 'Create bitmaps based on the currently mounted disk.',
                 'touch': '<filename> Create a new file in current directory.', }
@@ -102,6 +104,14 @@ class fileshell:
         elif command_root == 'display':
             if len(arguments) == 1:
                 return_val = fileshell.shell_display(arguments)
+            else:
+                print('ERROR: Received {} arguments but expected 1.'.format(len(arguments)))
+                return_val = fileshell.continue_shell
+        elif command_root == 'pwd':
+            return_val = fileshell.shell_pwd()
+        elif command_root == 'mkdir':
+            if len(arguments) == 1:
+                return_val = fileshell.shell_mkdir(arguments)
             else:
                 print('ERROR: Received {} arguments but expected 1.'.format(len(arguments)))
                 return_val = fileshell.continue_shell
@@ -216,4 +226,15 @@ class fileshell:
         filename = list(args)[0][0]
         # TODO: Check if the file even exists
         filesystem.fs_display(filename)
+        return fileshell.continue_shell
+
+    @classmethod
+    def shell_pwd(cls, ):
+        filesystem.fs_pwd()
+        return fileshell.continue_shell
+
+    @classmethod
+    def shell_mkdir(cls, *args):
+        dirname = list(args)[0][0]
+        filesystem.fs_mkdir(dirname)
         return fileshell.continue_shell

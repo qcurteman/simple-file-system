@@ -8,6 +8,7 @@ class filesystem:
 
     disks = []
     mounted_disk = None
+    current_directory = None
     inodebitmap = None
     databitmap = None
 
@@ -86,7 +87,7 @@ class filesystem:
         open_file = diskpy.Disk.disk_open(filesystem.mounted_disk)
         superblock = blocks.Superblock(diskpy.Disk.disk_read(open_file, 0))
         inode = blocks.Inode.get_inode(open_file, superblock.directory_inode)
-        directory = blocks.DataBlock.get_data(open_file, inode.direct[0])
+        directory = blocks.DirectoryBlock.get_data(open_file, inode.direct[0])
         for item in directory.data:
             if item['name'] != '':
                 print('  ', item['name'])
@@ -100,12 +101,23 @@ class filesystem:
         pass
 
     @classmethod
-    def init_directory(cls, open_file): #TODO: Implement how the different directories (etc, bin) are supposed to be represented in the inodes they have been assigned. See blocks.DataBlock.makeblock()
+    def fs_pwd(cls, ):
+        print(filesystem.current_directory)
+
+    @classmethod
+    def fs_mkdir(cls, dirname):
+        free_inode_loc = filesystem.inodebitmap.findFree()
+        blocks.DirectoryBlock.add_directory(filesystem.current_directory, dirname, free_inode_loc)
+
+
+    @classmethod
+    def init_directory(cls, open_file): #TODO: Implement how the different directories (etc, bin) are supposed to be represented in the inodes they have been assigned. See blocks.DirectoryBlock.makeblock()
         superblock = blocks.Superblock(diskpy.Disk.disk_read(open_file, 0))
         inodeblock = blocks.InodeBlock(diskpy.Disk.disk_read(open_file, superblock.first_inodeblock))
         inodeblock.inodes[0].is_valid = blocks.Inode.USED
         inodeblock.inodes[0].direct[0] = 0
         inodeblock.save_block(open_file, superblock.first_inodeblock)
 
-        datablock_raw = blocks.DataBlock.make_block()
-        diskpy.Disk.disk_write(open_file, superblock.first_datablock, datablock_raw)
+        directoryblock_raw = blocks.DirectoryBlock.make_block()
+        diskpy.Disk.disk_write(open_file, superblock.first_datablock, directoryblock_raw)
+        filesystem.current_directory = '/'

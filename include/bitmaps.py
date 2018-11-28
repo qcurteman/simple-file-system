@@ -81,14 +81,20 @@ class bitmap:
         self.saveToDisk(open_file)
 
 
-    def setFree(self, open_file, atOffset):
-        pass
+    def setFree(self, open_file, index):
+        self.bitmap[index] = bitmap.FREE
+        self.saveToDisk(open_file)
 
-    def setUsed(self, open_file, atOffset):
-        pass
+    def setUsed(self, open_file, index):
+        self.bitmap[index] = bitmap.USED
+        self.saveToDisk(open_file)
 
-    def findFree(self, open_file):
-        pass
+    def findFree(self, ):
+        index = 0
+        while index < len(self.bitmap):
+            if self.bitmap[index] == bitmap.FREE:
+                return index
+        return None
 
     def saveToDisk(self, open_file): # save the contents of "self.bitmap" to the disk
         superblock = blocks.Superblock(diskpy.Disk.disk_read(open_file, 0))
