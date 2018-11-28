@@ -86,7 +86,7 @@ class filesystem:
     def fs_ls(cls, ):
         open_file = diskpy.Disk.disk_open(filesystem.mounted_disk)
         superblock = blocks.Superblock(diskpy.Disk.disk_read(open_file, 0))
-        inode = blocks.Inode.get_inode(open_file, superblock.directory_inode)
+        inode, inodeblock = blocks.Inode.get_inode(open_file, superblock.directory_inode)
         directory = blocks.DirectoryBlock.get_data(open_file, inode.direct[0])
         for item in directory.data:
             if item['name'] != '':
@@ -106,8 +106,8 @@ class filesystem:
 
     @classmethod
     def fs_mkdir(cls, dirname):
-        free_inode_loc = filesystem.inodebitmap.findFree()
-        blocks.DirectoryBlock.add_directory(filesystem.current_directory, dirname, free_inode_loc)
+        open_file = diskpy.Disk.disk_open(filesystem.mounted_disk)
+        blocks.DirectoryBlock.add_directory(open_file, filesystem.current_directory, dirname, databitmap, inodebitmap)
 
 
     @classmethod
@@ -115,7 +115,7 @@ class filesystem:
         superblock = blocks.Superblock(diskpy.Disk.disk_read(open_file, 0))
         inodeblock = blocks.InodeBlock(diskpy.Disk.disk_read(open_file, superblock.first_inodeblock))
         inodeblock.inodes[0].is_valid = blocks.Inode.USED
-        inodeblock.inodes[0].direct[0] = 0
+        inodeblock.inodes[0].direct[0] = superblock.first_datablock
         inodeblock.save_block(open_file, superblock.first_inodeblock)
 
         directoryblock_raw = blocks.DirectoryBlock.make_block()

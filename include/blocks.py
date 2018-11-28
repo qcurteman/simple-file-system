@@ -118,7 +118,7 @@ class Inode:
             inodeblock_num += 1
 
         inodeblock = InodeBlock(diskpy.Disk.disk_read(open_file, superblock.first_inodeblock + inodeblock_num))
-        return inodeblock.inodes[val]
+        return inodeblock.inodes[val], inodeblock
         
 
 
@@ -137,7 +137,7 @@ class InodeBlock:
         for i in range(self.num_inodes):
             self.inodes.append(Inode(inodeblock[i*Inode.num_indexes : (i+1)*Inode.num_indexes]))
 
-    def save_block(self, open_file, location):
+    def save_block(self, open_file, block_location):
         merged_inodes = np.zeros(shape=(Block.block_size_bytes // 4), dtype=Block.data_type)
         index = 0
         for i in range(self.num_inodes):
@@ -150,7 +150,7 @@ class InodeBlock:
                 index+=1
             merged_inodes[index] = self.inodes[i].indirect
             index+=1
-        diskpy.Disk.disk_write(open_file, location, merged_inodes)
+        diskpy.Disk.disk_write(open_file, block_location, merged_inodes)
 
     @classmethod
     def make_block(cls, ):
@@ -183,6 +183,13 @@ class DirectoryBlock:
             offset += 28
             self.data.append({'node': temp_int, 'name': temp_str })
 
+    def save_block(self, open_file, data_block_loc):
+        data = []
+        for item in self.data:
+            data.append(item['node'])
+            data.append(item['name'])
+        diskpy.Disk.disk_write(open_file, data_block_loc, data)
+
     @classmethod
     def make_block(cls, ):
         data = []
@@ -197,14 +204,46 @@ class DirectoryBlock:
         return data
 
     @classmethod
-    def add_directory(cls, current_directory, name, free_inode):
+    def add_directory(cls, open_file, current_directory, name, databitmap, inodebitmap):
         '''
         To add a new directory:
-        1) find a new free inode 
+        1) find a new free inode to start the new directory in (inode is for if there are multiple datablocks required)
+        2) find a new datablock to store the new directory in
         2) add this data to a free location in the inode that is storing the current directory info.
         '''
+        superblock = blocks.Superblock(diskpy.Disk.disk_read(open_file, 0))
+        free_datablock = databitmap.findFree()
+        if current_directory == '/':
+            inode, inodeblock = Inode.get_inode(open_file, superblock.directory_inode)
+            found_free = False
+            for i in range(len(inode.direct)):
+                if inode.direct[i] == 0:
+                    found_free = True
+                    inode.direct[i] = free_datablock
+                    inodeblock.save_block(open_file, )
+                    databitmap.setUsed(open_file, free_datablock)
+                    break
+            if found_free == False:
+                free_inode = inodebitmap.findFree()
+                inode.indirect = free_inode
+                new_inode, new_inodeblock = Inode.get_inode(open_file, free_inode)
+                inodebitmap.setUsed(open_file, free_inode)
 
-        return [inode_loc, name]
+        '''
+        TODO: setup add_directory()
+        Steps:
+        1) check if there is a free spot available in the inode that has the current directory
+        2) if there isn't, look at the inode.indirect node to see if there is a free one there (recursively do that)
+        3) if you get the the end and there are no free inode.direct entries, get a new inode
+        4) add its location to the end of the last inode.indirect that you looked at
+        5) Make sure to save all changes made to inodes
+        6) do other stuff if it's not the root directory (might be able to not have 2 cases, 1 for root, 1 for everything else.)
+        
+        '''
+
+
+
+
 
     @classmethod
     def get_data(cls, open_file, block_offset):
