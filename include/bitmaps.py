@@ -105,6 +105,8 @@ def load_bitmaps(open_file):
     superblock = blocks.Superblock(diskpy.Disk.disk_read(open_file, 0))
     arraysize32 = diskpy.Disk.BLOCK_SIZE_BYTES // 4
 
+    # TODO: for both maps, have it just load the saved bitmap if there is one saved rather than call init() every time 
+
     inodebitmap = bitmap(arraysize32, superblock.inode_bitmap_loc, 'inode')
     inodebitmap.init(open_file)
 
